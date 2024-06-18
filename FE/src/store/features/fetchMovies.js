@@ -22,15 +22,32 @@ const moviesSlice = createSlice({
 })
 
 export const fetchMovies = ({ search, page, genreId }) => {
-    return async (dispatch) => {
+    return async (dispatch, getState) => {
         try {
-            const { data } = await axios({
+            let { data } = await axios({
                 method: "get",
                 url: `/movies?search=${search}&page=${page}&genreId=${genreId}`,
                 headers: {
                     Authorization: `Bearer ${localStorage.access_token}`
                 }
             })
+
+            const favorites = getState().movies.favorites
+
+            const favoritesData = favorites.map(favorite => [favorite.title, favorite.id]);
+
+            const updatedResults = data.results.map(movie => {
+                const favoriteData = favoritesData.find(fd => fd[0] === movie.title);
+                return {
+                    ...movie,
+                    isFav: !!favoriteData,
+                    idFav: favoriteData && favoriteData[1]
+                };
+            });
+
+            data.results = updatedResults
+
+            console.log("============ SUCCESS FETCH MOVIES ============")
 
             dispatch(setMovies(data))
         } catch (error) {
@@ -67,6 +84,8 @@ export const fetchFavorites = () => {
                     Authorization: `Bearer ${localStorage.access_token}`
                 }
             })
+
+            console.log("============ SUCCESS FETCH FAVORITE ============")
 
             dispatch(setFavorites(data))
         } catch (error) {

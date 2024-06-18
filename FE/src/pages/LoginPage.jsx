@@ -13,6 +13,7 @@ export default function Login() {
 
     const [unameOrEmail, setUnameOrEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [quote, setQuote] = useState('');
 
     const handleSubmit = async (e) => {
         try {
@@ -70,19 +71,26 @@ export default function Login() {
         dispatch(fetchQuote())
     }, [])
 
+    useEffect(() => {
+        if (quotes.length > 0) {
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            setQuote(randomQuote.text);
+        }
+    }, [quotes])
+
     return (
         <>
             <div className="h-screen bg-gray-800 flex justify-center items-center flex-col">
                 <div className="py-16">
-                    {quotes.length > 1 && (
-                        <p className="text-white text-3xl">{quotes[Math.floor(Math.random() * 10 - 1)].text}</p>
+                    {quote && (
+                        <p className="text-white text-3xl">{quote}</p>
                     )}
                 </div>
                 <div className="w-full max-w-sm p-4 bg-gray-800 border border-gray-700 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         <h5 className="text-xl text-center pt-2 font-medium text-gray-100 dark:text-white">Sign in to Movie-Z</h5>
                         <div>
-                            <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-100 dark:text-white">Your email or password</label>
+                            <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-100 dark:text-white">Your email or username</label>
                             <input type="text" id="email" value={unameOrEmail} onChange={(e) => setUnameOrEmail(e.target.value)} className="bg-gray-700 border border-gray-500 text-gray-100 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="name@mail.com" />
                         </div>
                         <div>

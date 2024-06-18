@@ -43,24 +43,27 @@ export default function DetailPage() {
                 </img>
 
                 {/* Description Container */}
-                <div className="flex-1 flex flex-col">
-                    <div className="p-5">
-                        <h1 className="text-3xl font-bold text-white">{detailMovie.title}</h1>
-                        <p className="text-white mt-2 w-auto">{detailMovie.overview}</p>
+                <div className="flex-1 flex flex-col gap-5">
+                    <div className="px-5">
+                        <h1 className="text-3xl font-bold text-white font-nowrap">{detailMovie.title}</h1>
+                        <p className="text-white mt-2 w-auto font-lato">{detailMovie.overview}</p>
                     </div>
-                    <div className="p-5 flex-1 flex overflow-x-auto gap-2">
-                        {movieTrailer.length && movieTrailer.map(link => (
-                            <iframe
-                                key={link}
-                                className="h-full w-1/2 rounded-md"
-                                width="100%"
-                                height="100%"
-                                src={link}
-                                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                                allowFullScreen
-                                style={{ maxWidth: "100%" }}
-                            ></iframe>
-                        ))}
+                    <div className="px-5 flex-1 flex flex-col gap-3">
+                        <h1 className="text-3xl font-bold text-white font-nowrap">Trailers:</h1>
+                        <div className="flex overflow-x-auto gap-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                            {movieTrailer && movieTrailer.map(link => (
+                                <iframe
+                                    key={link}
+                                    className="h-[165px] w-1/2 rounded-md"
+                                    width="100%"
+                                    height="100%"
+                                    src={link}
+                                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                                    allowFullScreen
+                                    style={{ maxWidth: "100%" }}
+                                ></iframe>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>

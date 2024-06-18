@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import Card from "../components/MovieCard";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchMovies, fetchGenres } from "../store/features/fetchMovies";
+import { fetchMovies, fetchGenres, fetchFavorites } from "../store/features/fetchMovies";
+import { CiSearch } from "react-icons/ci";
+import { RiArrowDropUpLine } from "react-icons/ri";
 
 export default function Home() {
     const dispatch = useDispatch();
@@ -15,10 +17,15 @@ export default function Home() {
         page: 1,
         genreId: "",
     });
+    const [showScroll, setShowScroll] = useState(false);
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const fetchMov = async () => {
         try {
-            await dispatch(fetchMovies(query));
+            dispatch(fetchMovies(query));
         } catch (error) {
             console.log(error);
         }
@@ -26,7 +33,7 @@ export default function Home() {
 
     const fetchGen = async () => {
         try {
-            await dispatch(fetchGenres());
+            dispatch(fetchGenres());
         } catch (error) {
             console.log(error);
         }
@@ -59,33 +66,54 @@ export default function Home() {
     };
 
     useEffect(() => {
+        dispatch(fetchFavorites())
         fetchMov();
         fetchGen();
     }, [query.page, query.genreId]);
 
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 300) {
+                setShowScroll(true);
+            } else {
+                setShowScroll(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+
     return (
         <>
             <div className="min-h-screen bg-gray-900 dark:bg-gray-800 flex flex-col items-center justify-center gap-3">
-                <form className="w-6/12 mt-24 mb-5 relative" onSubmit={handlerSearch}>
-                    <label htmlFor="default-search" className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
-                    <div className="relative flex gap-2">
-                        <select className="text-sm text-gray-900 dark:text-white border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:border-blue-500" onChange={handlerGenreChange} >
-                            <option value="">-- Genre --</option>
-                            {genres && genres.map((genre) => (
-                                <option key={genre.id} value={genre.id}>
-                                    {genre.name}
-                                </option>
-                            ))}
-                        </select>
-                        <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        </div>
-                        <input type="search" id="default-search" className="block w-full p-4 ps-10 text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 sticky top-0" placeholder="Search movie name..." value={query.search} onChange={e => setQuery({ ...query, search: e.target.value })} />
-                        <button type="submit" className="text-white absolute end-3 bottom-3 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
-                    </div>
+                <form className="w-auto mt-24 mb-5 relative flex bg-gray-800 rounded-full p-2 border border-gray-300 font-poppins" onSubmit={handlerSearch}>
+                    <select className="text-sm text-white dark:text-white border-none bg-gray-800 focus:ring-0 focus:outline-none flex-1 max-w-[30%]" onChange={handlerGenreChange}>
+                        <option selected disabled>Genre</option>
+                        {genres && genres.map((genre) => (
+                            <option key={genre.id} value={genre.id}>
+                                {genre.name}
+                            </option>
+                        ))}
+                    </select>
+                    <input
+                        type="search"
+                        id="default-search"
+                        className="block w-full text-md font-poppins bg-gray-800 focus:ring-0 focus:border-none border-none outline-none text-white flex-1 max-w-[60%]"
+                        placeholder="Search movie name..."
+                        value={query.search}
+                        onChange={e => setQuery({ ...query, search: e.target.value })}
+                    />
+                    <button type="submit" className="text-white bg-gradient-to-r from-green-400 to-blue-500 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2 max-w-[10%]">
+                        <CiSearch size={24} />
+                    </button>
                 </form>
 
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 px-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 px-8">
                     {movies?.results && movies.results.map((movie, i) => <Card key={i} movie={movie} />)}
                 </div>
 
@@ -96,6 +124,14 @@ export default function Home() {
                 </div>
             </div>
 
+            {showScroll && (
+                <button
+                    className="fixed bottom-8 right-8 bg-blue-600 text-white p-1 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none"
+                    onClick={scrollToTop}
+                >
+                    <RiArrowDropUpLine size={42} />
+                </button>
+            )}
         </>
     )
 }

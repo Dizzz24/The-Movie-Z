@@ -4,8 +4,11 @@ import MovieRating from "../components/MovieRating";
 import axios from "../config/instance";
 import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
-import { fetchFavorites } from "../store/features/fetchMovies";
-
+import { fetchFavorites, fetchMovies } from "../store/features/fetchMovies";
+import { GoBookmark } from "react-icons/go";
+import { TbEdit } from "react-icons/tb";
+import { MdOutlineDelete } from "react-icons/md";
+import { GoBookmarkFill } from "react-icons/go";
 
 export default function Card({ movie, type }) {
     const dispatch = useDispatch()
@@ -22,6 +25,9 @@ export default function Card({ movie, type }) {
             });
 
             const icon = data.message.includes("Item already exist") ? "info" : "success";
+
+            dispatch(fetchFavorites())
+            dispatch(fetchMovies({ search: "", page: 1, genreId: "" }))
 
             Swal.fire("", data.message, icon);
         } catch (error) {
@@ -44,7 +50,7 @@ export default function Card({ movie, type }) {
             if (result.isConfirmed) {
                 const { data } = await axios({
                     method: "delete",
-                    url: `/favorites/delete/${movie.id}`,
+                    url: `/favorites/delete/${movie.idFav || movie.id}`,
                     headers: {
                         Authorization: `Bearer ${localStorage.access_token}`,
                     },
@@ -58,6 +64,7 @@ export default function Card({ movie, type }) {
 
                 setTimeout(() => {
                     dispatch(fetchFavorites())
+                    dispatch(fetchMovies({ search: "", page: 1, genreId: "" }))
                 }, 500);
             }
         } catch (error) {
@@ -66,50 +73,50 @@ export default function Card({ movie, type }) {
         }
     }
 
+    function truncateText(text) {
+        return text.length > 25 ? text.substring(0, 25) + '...' : text;
+    }
+
+
     return (
-        <div title={movie.title} className="w-72 border border-gray-300 rounded p-1 bg-gray-500">
-            <div className="image">
-                <div className="wrapper glyphicons_v2 picture grey no_image_holder">
-                    <Link to={'/detail'} state={movie} title={movie.title}>
-                        <figure className="relative max-w-sm transition-all duration-300 cursor-pointer filter grayscale hover:grayscale-0">
-                            <img className="poster w-[100%] rounded" src={"https://image.tmdb.org/t/p/w500" + movie.poster_path} style={{ objectFit: "cover" }} alt={movie.title} />
-                        </figure>
-                    </Link>
+        <div className="transition-transform duration-500 hover:scale-105 2xl:w-72">
+            <Link to={'/detail'} state={movie}>
+                <figure className="card relative bg-gray-300 bg-opacity-60 shadow-lg rounded-xl cursor-pointer text-black">
+                    <img
+                        className="poster w-full h-full transition-all duration-300 rounded-t-xl object-cover grayscale hover:grayscale-0"
+                        src={"https://image.tmdb.org/t/p/w500" + movie.poster_path}
+                        alt={movie.title}
+                    />
+                    <div className="absolute top-0 left-0 py-1 text-center rounded-br-xl rounded-tl-lg font-medium bg-blue-300 md:px-3 md:text-lg sm:px-2 sm:text-md px-1">
+                        <h1 className="text-base">{format(new Date(movie.release_date || "2024-04-15"), 'd MMM yyyy')}</h1>
+                    </div>
+                </figure>
+            </Link>
+            <div className="bg-black bg-opacity-80 p-3 text-white text-xl font-bold rounded-b-xl md:text-lg sm:text-md flex justify-between items-center">
+                <div className="">
+                    <MovieRating className="" rating={Math.ceil(movie.vote_average) / 2} />
+                    <h1 className="cursor-text font-poppins">{truncateText(movie.title)}</h1>
                 </div>
-                <div className="options" data-id={movie.id} data-object-id={movie.object_id} data-media-type="movie" data-role="tooltip">
-                    <a className="no_click" href="#"><div className="glyphicons_v2 circle-more white"></div></a>
+                <div className="cursor-pointer">
+                    {type === "favorite" ? (
+                        <div className="flex justify-between">
+                            <Link to={"/edit"}>
+                                <TbEdit size={26} color="yellow" />
+                            </Link>
+                            <MdOutlineDelete size={26} color="red" onClick={handleDelete} />
+                        </div>
+                    ) : (
+                        <>
+                            {movie?.isFav ? (
+                                <GoBookmarkFill size={26} onClick={handleDelete} />
+                            ) : (
+                                <GoBookmark size={26} onClick={addToFavorite} />
+                            )}
+                        </>
+                    )}
                 </div>
-            </div>
 
-            <div className="p-4">
-                <h2><Link to={'/detail'} state={movie} title={movie.title} className="text-lg font-bold text-white">{movie.title}</Link></h2>
-                <div className="flex items-center justify-between mt-auto">
-                    <p className="font-medium">Rating:</p>
-                    <MovieRating rating={Math.ceil(movie.vote_average) / 2} />
-                </div>
-                <p className="text-sm text-gray-400">{format(new Date(movie.release_date), 'd MMM yyyy')}</p>
             </div>
-
-            {type === "favorite" ? (
-                <>
-                    <Link to={'/edit'} state={movie} className="inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium  text-yellow-500 rounded-lg group hover:text-white focus:ring-4 focus:outline-none focus:ring-cyan-200 dark:focus:ring-cyan-800">
-                        <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-yellow-500">
-                            Edit
-                        </span>
-                    </Link>
-                    <button className="inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium  text-red-500 rounded-lg group hover:text-white focus:ring-4 focus:outline-none focus:ring-cyan-200 dark:focus:ring-cyan-800" onClick={handleDelete}>
-                        <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-red-500">
-                            Delete
-                        </span>
-                    </button>
-                </>
-            ) : (
-                <button className="inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium  text-gray-900 rounded-lg group bg-gradient-to-br from-cyan-500 to-blue-500 group-hover:from-cyan-500 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-cyan-200 dark:focus:ring-cyan-800" onClick={addToFavorite}>
-                    <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
-                        Add to Favorite
-                    </span>
-                </button>
-            )}
         </div>
     );
 }
