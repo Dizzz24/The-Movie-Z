@@ -32,8 +32,12 @@ The Movie-Z is a platform where users can discover recommended movies and watch 
 - 🐘 **Postgres**: SQL database for data storage.
 - 📦 **Sequelize**: Promise-based ORM for Node.js.
 - 🔒 **BcryptJS**: Library for hashing passwords.
-- 🔑 **OAuth (Google)**: Google OAuth for authentication.
 - 🛡️ **JSON Web Token (JWT)**: For authentication and authorization.
+
+### 3rd Party Libraries
+
+- 🔑 **OAuth (Google)**: Google OAuth for authentication.
+- 🎬 **IMDB API**: For integrating detailed movie information and ratings.
 
 ## Screenshots
 
